@@ -21,7 +21,7 @@ public class ClientManager implements Runnable {
             //TODO: ...
             name = bufferedReader.readLine();
             System.out.println(name + " подключился к чату.");
-            privateMessage("Server: " + name + " подключился к чату.");
+            broadcastMessage("Server: " + name + " подключился к чату.");
         } catch (Exception e) {
             closeEverything(socket, bufferedReader, bufferedWriter);
         }
@@ -54,7 +54,7 @@ public class ClientManager implements Runnable {
     private void removeClient() {
         clients.remove(this);
         System.out.println(name + " покинул чат.");
-        privateMessage("Server: " + name + " покинул чат.");
+        broadcastMessage("Server: " + name + " покинул чат.");
     }
 
     /**
@@ -62,7 +62,7 @@ public class ClientManager implements Runnable {
      *
      * @param message сообщение
      */
-    private void privateMessage(String message) {
+    private void broadcastMessage(String message) {
         for (ClientManager client : clients) {
             try {
                 if (!client.equals(this) && message != null) {
@@ -76,13 +76,14 @@ public class ClientManager implements Runnable {
         }
     }
 
-    private void privateMessage(String adresat, String message) {
+    private void broadcastMessage(String adresat, String message) {
         for (ClientManager client : clients) {
             try {
                 if (client.name.equals(adresat) && message != null) {
                     client.bufferedWriter.write(message);
                     client.bufferedWriter.newLine();
                     client.bufferedWriter.flush();
+                    break;
                 }
             } catch (Exception e) {
                 closeEverything(socket, bufferedReader, bufferedWriter);
@@ -101,10 +102,10 @@ public class ClientManager implements Runnable {
                 if (messageFromClient.startsWith(name + ": @")) {
                     //отправка приватного сообщения
                     privateMessage = parseMessageFromClient(messageFromClient);
-                    privateMessage(privateMessage[0], privateMessage[1]);
+                    broadcastMessage(privateMessage[0], privateMessage[1]);
                 } else {
                     // Отправка данных всем слушателям
-                    privateMessage(messageFromClient);
+                    broadcastMessage(messageFromClient);
                 }
 
 
